@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Document</title>
+	<link href="https://fonts.googleapis.com/css?family=Barrio" rel="stylesheet"> 
+	<style>
+		body{
+			font-family: 'Barrio', cursive;
+			background-color: #e2e1e0;
+		}
+		.score-wrapp{
+			font-size: 20px;
+			text-align: right;
+			color: #49161F;
+			margin-bottom: 15px;
+		}
+		#score{
+			font-size: 36px;
+			display: inline-block;
+		}
+		.area-wrapp{
+			width: 320px;
+			height: 640px;
+			margin: 25px auto;
+		}
+		#area{
+			height: 100%;
+			/*border: 2px solid #C6D5CD;*/
+			/*background-color: #C6D5CD;*/
+			background: url(bg.jpg) center no-repeat;
+			background-size: cover;
+			position: relative;
+			border-radius: 20px;
+			overflow: hidden;
+			box-shadow: 0 3px 6px rgba(0,0,0,0.16), 0 3px 6px rgba(0,0,0,0.23);
+		}
+		.col{
+			width: 33.333%;
+			height: 100%;
+			position: absolute;
+			
+		}
+		.col + .col{
+			border-left: 1px solid #C6D5CD;
+		}
+		.col-1{
+			left: 0;
+		}
+		.col-2{
+			left: 33.333%;
+		}
+		.col-3{
+			left: 66.666%;
+		}
+		#player{
+			width: 33.333%;
+			position: absolute;
+			bottom: 0;
+			left: 0;
+			transition: all 0.1s ease-in-out;
+			height: 80px;
+			box-sizing: border-box;
+			background-color: #C6D5CD;
+			background: url(spaceship.png) center no-repeat;
+			background-size: 100% 100%;
+		}
+		.cube{
+			width: 70px;
+			height: 70px;
+			background: url(aestroid.png) center no-repeat;
+			background-size: 100% 100%;
+			/*background-color: #DB3340;*/
+			border-radius: 10px;
+			position: absolute;
+			left: 50%;
+			margin-left: -35px;
+			top: -70px;
+			box-sizing: border-box;
+			box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
+			/*border: 1px solid #DB3340;*/
+		}
+	</style>
+</head>
+<body>
+	<div class="area-wrapp">
+		<div class="score-wrapp">
+			Score:&nbsp;<div id="score"></div>
+		</div>
+		<div id="area">
+			<div class="col col-1"></div>
+			<div class="col col-2"></div>
+			<div class="col col-3"></div>
+			<div id="player" data-left="0"></div>
+		</div>
+	</div>
+	<script>
+		document.onkeydown = checkKey;
+		var player = document.getElementById('player'),
+			playerData = player.dataset,
+			score = 0,
+			cols = document.getElementsByClassName('col'),
+			cubes = [],
+			cube,
+			cubeSpeed = 7,
+			counter = 210,
+			deadCubeIndex = Math.floor(Math.random() * (cols.length - 0)) + 0;;
+		function checkKey(e) {
+			playerData = player.dataset;
+			var playerLeftPosition = parseFloat(playerData.left);
+		    e = e || window.event;
+		    if (e.keyCode == '37' && playerLeftPosition > 0) {
+		       playerData.left = playerLeftPosition - 33.333;
+		    }
+		    else if (e.keyCode == '39' && playerLeftPosition < 66.666) {
+		       playerData.left = playerLeftPosition + 33.333;
+		    }
+		    player.style.left = playerData.left + '%';
+		} 
+		for (var i = 0; i < cols.length; i++){
+			if (i != deadCubeIndex){
+				cube = document.createElement('div');
+				cube.className = 'cube';
+				cube.topPosition = -70;
+				cubes.push(cube);
+				cols[i].appendChild(cube);
+			}
+		}
+		function animate() {
+			animation_id = requestAnimationFrame(animate);
+			document.getElementById('score').innerHTML = score;
+			score += cubeSpeed;
+			counter -= cubeSpeed;
+			if (score == cubeSpeed * 1000){
+				cubeSpeed += 1;
+			}
+			if (counter < 0){
+				deadCubeIndex = Math.floor(Math.random() * (cols.length - 0)) + 0;
+				for (var i = 0; i < cols.length; i++){
+					if (i != deadCubeIndex){
+						cube = document.createElement('div');
+						cube.className = 'cube';
+						cube.topPosition = -70;
+						cubes.push(cube);
+						cols[i].appendChild(cube);
+					}
+				}
+				counter = 210;
+			}
+			for (var i = 0; i < cubes.length; i++){
+				var cubeRect = cubes[i].getBoundingClientRect(),
+					playerRect = player.getBoundingClientRect()
+				if (cubeRect.left > playerRect.left && cubeRect.right < playerRect.right && cubeRect.bottom == playerRect.top){
+					cancelAnimationFrame(animation_id);
+					alert('Your score: ' + score);
+				}
+				cubes[i].topPosition += cubeSpeed;
+				cubes[i].style.top = cubes[i].topPosition + 'px';
+				if (cubes[i].topPosition > 1000){
+					cubes[i].parentNode.removeChild(cubes[i]);
+					cubes.splice(i, 1);
+				}
+			}	
+		}
+		animate();
+	</script>
+</body>
+</html>
