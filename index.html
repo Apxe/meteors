@@ -28,7 +28,7 @@
 			height: 100%;
 			/*border: 2px solid #C6D5CD;*/
 			/*background-color: #C6D5CD;*/
-			background: url(bg.jpg) center no-repeat;
+			background: url(bg.png) center no-repeat;
 			background-size: cover;
 			position: relative;
 			border-radius: 20px;
@@ -42,7 +42,7 @@
 			
 		}
 		.col + .col{
-			border-left: 1px solid #C6D5CD;
+			border-left: 1px solid rgba(182, 184, 190, 0.35);
 		}
 		.col-1{
 			left: 0;
@@ -53,32 +53,39 @@
 		.col-3{
 			left: 66.666%;
 		}
-		#player{
+		#player-wrapp{
 			width: 33.333%;
 			position: absolute;
-			bottom: 0;
-			left: 0;
+			bottom: 16px;
+			left: 33.333%;
+			height: 56px;
 			transition: all 0.1s ease-in-out;
-			height: 80px;
+		}
+		#player{
+			margin: 0 auto;
+			width: 56px;
+			height: 56px;
 			box-sizing: border-box;
 			background-color: #C6D5CD;
-			background: url(spaceship.png) center no-repeat;
+			background: url(spaceship.svg) center no-repeat;
 			background-size: 100% 100%;
 		}
 		.cube{
-			width: 70px;
-			height: 70px;
+			width: 60px;
+			height: 60px;
 			background: url(aestroid.png) center no-repeat;
 			background-size: 100% 100%;
-			/*background-color: #DB3340;*/
 			border-radius: 10px;
 			position: absolute;
 			left: 50%;
-			margin-left: -35px;
+			margin-left: -30px;
 			top: -70px;
 			box-sizing: border-box;
-			box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
-			/*border: 1px solid #DB3340;*/
+			/*animation: rotate 15s;*/
+		}
+		@keyframes rotate {
+		    from {transform: rotateZ(0);}
+		    to {transform: rotateZ(360deg);}
 		}
 	</style>
 </head>
@@ -91,31 +98,34 @@
 			<div class="col col-1"></div>
 			<div class="col col-2"></div>
 			<div class="col col-3"></div>
-			<div id="player" data-left="0"></div>
+			<div id="player-wrapp" data-left="0">
+				<div id="player"></div>
+			</div>	
 		</div>
 	</div>
 	<script>
 		document.onkeydown = checkKey;
-		var player = document.getElementById('player'),
-			playerData = player.dataset,
+		var playerWrapp = document.getElementById('player-wrapp'),
+			player = document.getElementById('player'),
+			playerWrappData = playerWrapp.dataset,
 			score = 0,
 			cols = document.getElementsByClassName('col'),
 			cubes = [],
 			cube,
-			cubeSpeed = 7,
+			cubeSpeed = 5,
 			counter = 210,
 			deadCubeIndex = Math.floor(Math.random() * (cols.length - 0)) + 0;;
 		function checkKey(e) {
-			playerData = player.dataset;
-			var playerLeftPosition = parseFloat(playerData.left);
+			playerWrappData = playerWrapp.dataset;
+			var playerWrappLeftPosition = parseFloat(playerWrappData.left);
 		    e = e || window.event;
-		    if (e.keyCode == '37' && playerLeftPosition > 0) {
-		       playerData.left = playerLeftPosition - 33.333;
+		    if (e.keyCode == '37' && playerWrappLeftPosition > 0) {
+		       playerWrappData.left = playerWrappLeftPosition - 33.333;
 		    }
-		    else if (e.keyCode == '39' && playerLeftPosition < 66.666) {
-		       playerData.left = playerLeftPosition + 33.333;
+		    else if (e.keyCode == '39' && playerWrappLeftPosition < 66.666) {
+		       playerWrappData.left = playerWrappLeftPosition + 33.333;
 		    }
-		    player.style.left = playerData.left + '%';
+		    playerWrapp.style.left = playerWrappData.left + '%';
 		} 
 		for (var i = 0; i < cols.length; i++){
 			if (i != deadCubeIndex){
@@ -126,6 +136,7 @@
 				cols[i].appendChild(cube);
 			}
 		}
+		// meteors animation ->
 		function animate() {
 			animation_id = requestAnimationFrame(animate);
 			document.getElementById('score').innerHTML = score;
@@ -137,7 +148,7 @@
 			if (counter < 0){
 				deadCubeIndex = Math.floor(Math.random() * (cols.length - 0)) + 0;
 				for (var i = 0; i < cols.length; i++){
-					if (i != deadCubeIndex){
+					if (i != deadCubeIndex ){
 						cube = document.createElement('div');
 						cube.className = 'cube';
 						cube.topPosition = -70;
@@ -149,8 +160,12 @@
 			}
 			for (var i = 0; i < cubes.length; i++){
 				var cubeRect = cubes[i].getBoundingClientRect(),
-					playerRect = player.getBoundingClientRect()
-				if (cubeRect.left > playerRect.left && cubeRect.right < playerRect.right && cubeRect.bottom == playerRect.top){
+					playerRect = player.getBoundingClientRect();
+				// console.log(cubeRect.left + ' ' + cubeRect.right);
+				// console.log(playerRect.left + ' ' + playerRect.right);
+				// cancelAnimationFrame(animation_id);
+				if (cubeRect.left < playerRect.left && cubeRect.right > playerRect.right 
+					&& playerRect.top < cubeRect.bottom && (playerRect.top > cubeRect.top || playerRect.bottom > cubeRect.top)){  
 					cancelAnimationFrame(animation_id);
 					alert('Your score: ' + score);
 				}
